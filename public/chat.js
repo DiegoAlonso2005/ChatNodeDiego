@@ -13,21 +13,40 @@ var persona = document.getElementById('persona'),
 
 var adjuntoData = null;
 
-// Sonido nativo al enviar y recibir mensajes
+// Sonido estilo "Pop / Campana retro" más fuerte y con cuerpo
 function reproducirSonido() {
     try {
         var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        var osc = audioCtx.createOscillator();
-        var gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(650, audioCtx.currentTime);
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08);
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.2);
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        var osc1 = audioCtx.createOscillator();
+        var osc2 = audioCtx.createOscillator();
+        var gainNode = audioCtx.createGain();
+
+        osc1.type = 'triangle';
+        osc2.type = 'sine';
+
+        // Frecuencias ascendentes estilo videojuego/burbuja
+        osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime); // Do
+        osc1.frequency.exponentialRampToValueAtTime(880.00, audioCtx.currentTime + 0.12); // La
+
+        osc2.frequency.setValueAtTime(659.25, audioCtx.currentTime); // Mi
+        osc2.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.12); // Do agudo
+
+        // Volumen alto y caída suave
+        gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.28);
+
+        osc1.connect(gainNode);
+        osc2.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        osc1.start();
+        osc2.start();
+        osc1.stop(audioCtx.currentTime + 0.28);
+        osc2.stop(audioCtx.currentTime + 0.28);
     } catch (e) { }
 }
 
@@ -38,10 +57,10 @@ archivoInput.addEventListener('change', function (e) {
     reader.onload = function (evt) {
         adjuntoData = {
             nombre: file.name,
-            tipo: file.type,
+            tipo: file.type || file.name.split('.').pop(),
             data: evt.target.result
         };
-        nombreArchivo.innerHTML = "Archivo: " + file.name;
+        nombreArchivo.innerHTML = "📎 Listo para enviar: <strong>" + file.name + "</strong>";
     };
     reader.readAsDataURL(file);
 });
@@ -89,10 +108,28 @@ socket.on('chat', function (data) {
 
     var contenidoArchivo = '';
     if (data.archivo) {
-        if (data.archivo.tipo.startsWith('image/')) {
+        var tipo = data.archivo.tipo.toLowerCase();
+        var ext = data.archivo.nombre.split('.').pop().toLowerCase();
+
+        // Imagen
+        if (tipo.startsWith('image/')) {
             contenidoArchivo = '<br><img class="img-adjunta" src="' + data.archivo.data + '">';
-        } else {
-            contenidoArchivo = '<br><a class="link-adjunto" href="' + data.archivo.data + '" download="' + data.archivo.nombre + '">Descargar ' + data.archivo.nombre + '</a>';
+        }
+        // Audio (reproductor integrado para m4a, mp3, ogg, wav)
+        else if (tipo.startsWith('audio/') || ['m4a', 'mp3', 'ogg', 'wav'].includes(ext)) {
+            contenidoArchivo = '<br><audio controls style="margin-top:8px; max-width: 100%;"><source src="' + data.archivo.data + '">Tu navegador no soporta el reproductor de audio.</audio><br><small>' + data.archivo.nombre + '</small>';
+        }
+        // Video (reproductor integrado para mp4, webm, mov)
+        else if (tipo.startsWith('video/') || ['mp4', 'webm', 'mov'].includes(ext)) {
+            contenidoArchivo = '<br><video controls style="margin-top:8px; max-width: 280px; border-radius: 6px;"><source src="' + data.archivo.data + '"></video>';
+        }
+        // PDF (visor incrustado y botón de lectura)
+        else if (tipo.includes('pdf') || ext === 'pdf') {
+            contenidoArchivo = '<br><iframe src="' + data.archivo.data + '" style="width: 100%; height: 250px; border: 1px solid #ccc; margin-top: 8px; border-radius: 4px;"></iframe><br><a class="link-adjunto" href="' + data.archivo.data + '" target="_blank">📄 Abrir ' + data.archivo.nombre + ' en pantalla completa</a>';
+        }
+        // Otros documentos
+        else {
+            contenidoArchivo = '<br><a class="link-adjunto" href="' + data.archivo.data + '" download="' + data.archivo.nombre + '" target="_blank">📎 Descargar / Abrir ' + data.archivo.nombre + '</a>';
         }
     }
 
