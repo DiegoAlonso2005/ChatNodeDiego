@@ -1,19 +1,19 @@
 {
   "name": "chatnodediego",
   "version": "1.0.0",
-  "description": "",
+  "description": "Chat en nodejs con sockets",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Diego Alonso",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.2.1",
-    "socket.io": "^4.8.4"
+    "express": "^4.18.2",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.0"
   }
 }

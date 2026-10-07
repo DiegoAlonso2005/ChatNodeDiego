@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Práctica de evaluación Socket</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
+</head>
+
+<body>
+
+    <div id="panel-bienvenida">
+        <h2>Práctica de evaluación usando Sockets de comunicación - Ing. Alex R.G.</h2>
+        <input id="persona" type="text" placeholder="Ingresa tu nombre">
+        <button id="ingresar" onclick="ingresarAlChat()">Ingresar al chat</button>
+    </div>
+
+    <div id="app-chat" style="display:none;">
+        <h2>Práctica de evaluación 1er. parcial - Ing. Alex R.G.</h2>
+        <h2 class="nube box">Chat con socket</h2>
+
+        <div id="ventana-mensajes">
+            <div id="output"></div>
+            <div id="escribiendo-mensaje"></div>
+        </div>
+
+        <input id="usuario" type="text" placeholder="Tu nombre" readonly>
+
+        <div style="display: flex; gap: 8px;">
+            <input id="mensaje" type="text" placeholder="Ingresa un mensaje">
+            <label for="archivo"
+                style="cursor: pointer; background: #ddd; padding: 10px 14px; border-radius: 4px; display: flex; align-items: center;"
+                title="Adjuntar foto/archivo">📎</label>
+            <input id="archivo" type="file" style="display: none;">
+            <button id="enviar">Enviar</button>
+        </div>
+        <div id="nombre-archivo" style="font-size: 12px; color: #555; padding-top: 4px;"></div>
+    </div>
+
+    <script src="/chat.js"></script>
+</body>
+
+</html>
